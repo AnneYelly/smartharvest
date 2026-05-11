@@ -1,6 +1,7 @@
 package com.upc.smartharvest.controllers;
 
 import com.upc.smartharvest.DTOS.CosechaDTO;
+import com.upc.smartharvest.DTOS.ReporteCosechaDTO;
 import com.upc.smartharvest.entities.*;
 import com.upc.smartharvest.services.CosechaService;
 import lombok.RequiredArgsConstructor;
@@ -81,6 +82,15 @@ public class CosechaController {
     public ResponseEntity<List<CosechaDTO>> findParcelaParcelaId(@PathVariable Long parcelaId) {
         return new ResponseEntity<>(cosechaService.listarPorParcela(parcelaId).stream().map(this::toDTO).toList(), HttpStatus.OK);
     }
+
+    @PostMapping("/reporte")
+    public ResponseEntity<List<ReporteCosechaDTO>> obtenerReporte(@RequestBody ReporteCosechaDTO.Request fechas){
+        return new ResponseEntity<>(cosechaService.generarReporteCosecha(
+                fechas.getFechaInicio(),
+                fechas.getFechaFin()),
+                HttpStatus.OK);
+    }
+
 
     private CosechaDTO toDTO(Cosecha entity) {
         CosechaDTO dto = new CosechaDTO();
