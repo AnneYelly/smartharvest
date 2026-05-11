@@ -148,10 +148,14 @@ public class SensorLotController {
     }
 
     @PostMapping
-    public ResponseEntity<SensorLotDTO> create(@RequestBody SensorLotDTO dto) {
-        SensorLot entity = new SensorLot();
-        copyToEntity(dto, entity);
-        return new ResponseEntity<>(toDTO(sensorLotService.registrar(entity)), HttpStatus.CREATED);
+    public ResponseEntity<?> create(@RequestBody SensorLotDTO dto) {
+        try {
+            SensorLot entity = new SensorLot();
+            copyToEntity(dto, entity);
+            return new ResponseEntity<>(toDTO(sensorLotService.registrar(entity)), HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PutMapping("/{id}")

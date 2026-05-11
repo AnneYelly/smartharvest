@@ -1,5 +1,6 @@
 package com.upc.smartharvest.ServicesImpl;
 
+import com.upc.smartharvest.DTOS.ReporteCosechaDTO;
 import com.upc.smartharvest.entities.Cosecha;
 import com.upc.smartharvest.repository.CosechaRepository;
 import com.upc.smartharvest.services.CosechaService;
@@ -83,4 +84,11 @@ public class CosechaServiceImpl implements CosechaService {
     public List<Cosecha> listarPorParcela(Long parcelaId) {
         return cosechaRepository.findByCultivoParcelaId(parcelaId);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ReporteCosechaDTO> generarReporteCosecha(LocalDate fechaInicio, LocalDate fechaFin) {
+        return cosechaRepository.obtenerReporteCosecha(fechaInicio, fechaFin);
+    }
+
 }

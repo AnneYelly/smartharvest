@@ -1,5 +1,6 @@
 package com.upc.smartharvest.services;
 
+import com.upc.smartharvest.DTOS.ReporteCosechaDTO;
 import com.upc.smartharvest.entities.Cosecha;
 
 import java.time.LocalDate;
@@ -24,4 +25,7 @@ public interface CosechaService {
     List<Cosecha> listarPorFechaCosechaEntre(LocalDate inicio, LocalDate fin);
 
     List<Cosecha> listarPorParcela(Long parcelaId);
+
+    public List<ReporteCosechaDTO> generarReporteCosecha(LocalDate fechaInicio, LocalDate fechaFin);
+
 }
