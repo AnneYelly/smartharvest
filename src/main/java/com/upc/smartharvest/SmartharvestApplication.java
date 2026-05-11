@@ -18,6 +18,7 @@ public class SmartharvestApplication {
         SpringApplication.run(SmartharvestApplication.class, args);
     }
     //ALEX
+    //prueba de conexión al repositorio - [Ingrid]
     @Bean
     CommandLineRunner initData(
             AgricultorRepository agricultorRepository,
