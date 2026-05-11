@@ -31,6 +31,33 @@ public class AgricultorController {
         }
     }
 
+    @GetMapping("/{id}/perfil")
+    public ResponseEntity<AgricultorDTO> obtenerPerfil(@PathVariable Long id) {
+        try {
+            Agricultor agricultor = agricultorService.obtenerPorId(id);
+            return new ResponseEntity<>(toDTO(agricultor), HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PatchMapping("/{id}/perfil")
+    public ResponseEntity<AgricultorDTO> actualizarPerfil(
+            @PathVariable Long id,
+            @RequestBody AgricultorDTO dto) {
+        try {
+            Agricultor entity = new Agricultor();
+            entity.setEmail(dto.getEmail());
+            entity.setTelefono(dto.getTelefono());
+
+            Agricultor actualizado = agricultorService.actualizarPerfil(id, entity);
+
+            return new ResponseEntity<>(toDTO(actualizado), HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @PostMapping
     public ResponseEntity<AgricultorDTO> create(@RequestBody AgricultorDTO dto) {
         Agricultor entity = new Agricultor();

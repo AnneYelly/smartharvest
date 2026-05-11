@@ -27,4 +27,12 @@ public interface AlertaService {
     List<Alerta> listarPorParcelaOrdenFechaDesc(Long parcelaId);
 
     List<Alerta> listarPorNivelYEstado(String nivel, String estado);
+
+    List<Alerta> listarNotificacionesPendientes();
+
+    Long contarNotificacionesPendientes();
+
+    List<Alerta> listarAlertasImportantes();
+
+    Alerta marcarComoVista(Long id);
 }

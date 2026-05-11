@@ -28,4 +28,6 @@ public interface TareaAgricolaService {
     List<TareaAgricola> listarPorUsuarioYEstado(Long usuarioId, String estado);
 
     List<TareaAgricola> listarPorFechaProgramadaEntre(LocalDate inicio, LocalDate fin);
+
+    List<TareaAgricola> filtrarTareas(String busqueda, String estado, LocalDate fechaInicio, LocalDate fechaFin);
 }

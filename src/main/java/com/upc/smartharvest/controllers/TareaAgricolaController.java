@@ -34,6 +34,22 @@ public class TareaAgricolaController {
         }
     }
 
+    @GetMapping("/filtrar")
+    public ResponseEntity<List<TareaAgricolaDTO>> filtrarTareas(
+            @RequestParam(required = false) String busqueda,
+            @RequestParam(required = false) String estado,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin
+    ) {
+        return new ResponseEntity<>(
+                tareaAgricolaService.filtrarTareas(busqueda, estado, fechaInicio, fechaFin)
+                        .stream()
+                        .map(this::toDTO)
+                        .toList(),
+                HttpStatus.OK
+        );
+    }
+
     @PostMapping
     public ResponseEntity<TareaAgricolaDTO> create(@RequestBody TareaAgricolaDTO dto) {
         TareaAgricola entity = new TareaAgricola();

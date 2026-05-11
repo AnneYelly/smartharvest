@@ -97,4 +97,48 @@ public class TareaAgricolaServiceImpl implements TareaAgricolaService {
     public List<TareaAgricola> listarPorFechaProgramadaEntre(LocalDate inicio, LocalDate fin) {
         return tareaAgricolaRepository.findByFechaProgramadaBetween(inicio, fin);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TareaAgricola> filtrarTareas(String busqueda, String estado, LocalDate fechaInicio, LocalDate fechaFin) {
+        return tareaAgricolaRepository.findAll()
+                .stream()
+                .filter(tarea -> {
+                    if (busqueda == null || busqueda.trim().isEmpty()) {
+                        return true;
+                    }
+
+                    String texto = busqueda.trim().toLowerCase();
+
+                    return (tarea.getTipoTarea() != null && tarea.getTipoTarea().toLowerCase().contains(texto))
+                            || (tarea.getDescripcion() != null && tarea.getDescripcion().toLowerCase().contains(texto))
+                            || (tarea.getPrioridad() != null && tarea.getPrioridad().toLowerCase().contains(texto))
+                            || (tarea.getEstado() != null && tarea.getEstado().toLowerCase().contains(texto));
+                })
+                .filter(tarea -> {
+                    if (estado == null || estado.trim().isEmpty()) {
+                        return true;
+                    }
+
+                    return tarea.getEstado() != null
+                            && tarea.getEstado().equalsIgnoreCase(estado.trim());
+                })
+                .filter(tarea -> {
+                    if (fechaInicio == null) {
+                        return true;
+                    }
+
+                    return tarea.getFechaProgramada() != null
+                            && !tarea.getFechaProgramada().isBefore(fechaInicio);
+                })
+                .filter(tarea -> {
+                    if (fechaFin == null) {
+                        return true;
+                    }
+
+                    return tarea.getFechaProgramada() != null
+                            && !tarea.getFechaProgramada().isAfter(fechaFin);
+                })
+                .toList();
+    }
 }

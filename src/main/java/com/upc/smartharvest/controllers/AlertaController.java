@@ -22,6 +22,48 @@ public class AlertaController {
         return new ResponseEntity<>(alertaService.listar().stream().map(this::toDTO).toList(), HttpStatus.OK);
     }
 
+    @GetMapping("/notificaciones")
+    public ResponseEntity<List<AlertaDTO>> listarNotificacionesPendientes() {
+        return new ResponseEntity<>(
+                alertaService.listarNotificacionesPendientes()
+                        .stream()
+                        .map(this::toDTO)
+                        .toList(),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping("/notificaciones/pendientes/count")
+    public ResponseEntity<Long> contarNotificacionesPendientes() {
+        return new ResponseEntity<>(
+                alertaService.contarNotificacionesPendientes(),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping("/notificaciones/importantes")
+    public ResponseEntity<List<AlertaDTO>> listarAlertasImportantes() {
+        return new ResponseEntity<>(
+                alertaService.listarAlertasImportantes()
+                        .stream()
+                        .map(this::toDTO)
+                        .toList(),
+                HttpStatus.OK
+        );
+    }
+
+    @PatchMapping("/{id}/vista")
+    public ResponseEntity<AlertaDTO> marcarComoVista(@PathVariable Long id) {
+        try {
+            return new ResponseEntity<>(
+                    toDTO(alertaService.marcarComoVista(id)),
+                    HttpStatus.OK
+            );
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<AlertaDTO> findById(@PathVariable Long id) {
         try {

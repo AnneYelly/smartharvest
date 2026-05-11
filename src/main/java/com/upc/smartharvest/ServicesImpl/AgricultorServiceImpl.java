@@ -103,6 +103,32 @@ public class AgricultorServiceImpl implements AgricultorService {
         return agricultorRepository.existsByEmail(email);
     }
 
+    @Override
+    public Agricultor actualizarPerfil(Long id, Agricultor agricultor) {
+        Agricultor actual = obtenerPorId(id);
+
+        if (agricultor.getEmail() == null || agricultor.getEmail().trim().isEmpty()) {
+            throw new RuntimeException("El correo es obligatorio");
+        }
+
+        if (agricultor.getTelefono() == null || agricultor.getTelefono().trim().isEmpty()) {
+            throw new RuntimeException("El teléfono es obligatorio");
+        }
+
+        String emailLimpio = agricultor.getEmail().trim().toLowerCase();
+        String telefonoLimpio = agricultor.getTelefono().trim();
+
+        if (!Objects.equals(actual.getEmail(), emailLimpio)
+                && agricultorRepository.existsByEmail(emailLimpio)) {
+            throw new RuntimeException("Ya existe un agricultor con el email: " + emailLimpio);
+        }
+
+        actual.setEmail(emailLimpio);
+        actual.setTelefono(telefonoLimpio);
+
+        return agricultorRepository.save(actual);
+    }
+
     private void validarDniYEmailUnicos(Agricultor agricultor) {
         if (agricultorRepository.existsByDni(agricultor.getDni())) {
             throw new RuntimeException("Ya existe un agricultor con el DNI: " + agricultor.getDni());

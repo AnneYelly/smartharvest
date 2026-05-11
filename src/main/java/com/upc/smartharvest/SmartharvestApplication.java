@@ -17,7 +17,6 @@ public class SmartharvestApplication {
     public static void main(String[] args) {
         SpringApplication.run(SmartharvestApplication.class, args);
     }
-    //ALEX
     @Bean
     CommandLineRunner initData(
             AgricultorRepository agricultorRepository,

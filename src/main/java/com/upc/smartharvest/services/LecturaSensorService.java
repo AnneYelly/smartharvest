@@ -26,4 +26,6 @@ public interface LecturaSensorService {
     List<LecturaSensor> listarAnomalias();
 
     List<LecturaSensor> listarAnomaliasPorSensor(Long sensorId);
+
+    LecturaSensor obtenerUltimaLecturaPorSensor(Long sensorId);
 }

@@ -24,4 +24,5 @@ public interface SensorLotService {
     List<SensorLot> listarPorParcelaYEstado(Long parcelaId, String estado);
 
     boolean existePorCodigo(String codigo);
+
 }

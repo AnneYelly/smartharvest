@@ -86,6 +86,18 @@ public class LecturaSensorController {
         return new ResponseEntity<>(lecturaSensorService.listarAnomaliasPorSensor(sensorId).stream().map(this::toDTO).toList(), HttpStatus.OK);
     }
 
+    @GetMapping("/sensor/{sensorId}/ultima")
+    public ResponseEntity<LecturaSensorDTO> obtenerUltimaLecturaPorSensor(@PathVariable Long sensorId) {
+        try {
+            return new ResponseEntity<>(
+                    toDTO(lecturaSensorService.obtenerUltimaLecturaPorSensor(sensorId)),
+                    HttpStatus.OK
+            );
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
     private LecturaSensorDTO toDTO(LecturaSensor entity) {
         LecturaSensorDTO dto = new LecturaSensorDTO();
         dto.setId(entity.getId());

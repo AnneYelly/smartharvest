@@ -85,4 +85,12 @@ public class LecturaSensorServiceImpl implements LecturaSensorService {
     public List<LecturaSensor> listarAnomaliasPorSensor(Long sensorId) {
         return lecturaSensorRepository.findBySensorIdAndEsAnomaliaTrue(sensorId);
     }
+
+    @Override
+    public LecturaSensor obtenerUltimaLecturaPorSensor(Long sensorId) {
+        return lecturaSensorRepository.findBySensorIdOrderByFechaHoraDesc(sensorId)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No existen lecturas para el sensor con ID: " + sensorId));
+    }
 }

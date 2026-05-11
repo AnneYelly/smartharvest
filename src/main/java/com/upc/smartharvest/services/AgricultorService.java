@@ -26,4 +26,6 @@ public interface AgricultorService {
     boolean existePorDni(String dni);
 
     boolean existePorEmail(String email);
+
+    Agricultor actualizarPerfil(Long id, Agricultor agricultor);
 }

@@ -21,4 +21,5 @@ public interface TareaAgricolaRepository extends JpaRepository<TareaAgricola, Lo
     List<TareaAgricola> findByUsuarioIdAndEstado(Long usuarioId, String estado);
 
     List<TareaAgricola> findByFechaProgramadaBetween(LocalDate inicio, LocalDate fin);
+
 }

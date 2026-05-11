@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -93,5 +94,40 @@ public class AlertaServiceImpl implements AlertaService {
     @Transactional(readOnly = true)
     public List<Alerta> listarPorNivelYEstado(String nivel, String estado) {
         return alertaRepository.findByNivelAndEstado(nivel, estado);
+    }
+
+    @Override
+    public List<Alerta> listarNotificacionesPendientes() {
+        return alertaRepository.findByEstado("PENDIENTE");
+    }
+
+    @Override
+    public Long contarNotificacionesPendientes() {
+        return (long) alertaRepository.findByEstado("PENDIENTE").size();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Alerta> listarAlertasImportantes() {
+        return alertaRepository.findByEstado("PENDIENTE")
+                .stream()
+                .filter(alerta -> alerta.getNivel() != null &&
+                        (
+                                alerta.getNivel().equalsIgnoreCase("ALTO") ||
+                                        alerta.getNivel().equalsIgnoreCase("CRITICO") ||
+                                        alerta.getNivel().equalsIgnoreCase("CRÍTICO")
+                        ))
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public Alerta marcarComoVista(Long id) {
+        Alerta alerta = obtenerPorId(id);
+
+        alerta.setEstado("VISTA");
+        alerta.setFechaResolucion(LocalDateTime.now());
+
+        return alertaRepository.save(alerta);
     }
 }

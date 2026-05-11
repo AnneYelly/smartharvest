@@ -8,8 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/parcelas")
@@ -21,6 +21,45 @@ public class ParcelaController {
     @GetMapping
     public ResponseEntity<List<ParcelaDTO>> findAll() {
         return new ResponseEntity<>(parcelaService.listar().stream().map(this::toDTO).toList(), HttpStatus.OK);
+    }
+
+    @GetMapping("/ubicaciones")
+    public ResponseEntity<List<Map<String, Object>>> listarUbicacionesParcelas() {
+        List<Map<String, Object>> respuesta = parcelaService.listar()
+                .stream()
+                .map(parcela -> {
+                    Map<String, Object> item = new LinkedHashMap<>();
+
+                    item.put("id", parcela.getId());
+                    item.put("nombre", parcela.getNombre());
+                    item.put("ubicacion", parcela.getUbicacion());
+                    item.put("latitud", parcela.getLatitud());
+                    item.put("longitud", parcela.getLongitud());
+
+                    return item;
+                })
+                .toList();
+
+        return new ResponseEntity<>(respuesta, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/ubicacion")
+    public ResponseEntity<Map<String, Object>> obtenerUbicacionParcela(@PathVariable Long id) {
+        try {
+            Parcela parcela = parcelaService.obtenerPorId(id);
+
+            Map<String, Object> respuesta = new LinkedHashMap<>();
+            respuesta.put("id", parcela.getId());
+            respuesta.put("nombre", parcela.getNombre());
+            respuesta.put("ubicacion", parcela.getUbicacion());
+            respuesta.put("latitud", parcela.getLatitud());
+            respuesta.put("longitud", parcela.getLongitud());
+
+            return new ResponseEntity<>(respuesta, HttpStatus.OK);
+
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping("/{id}")

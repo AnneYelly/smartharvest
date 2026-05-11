@@ -8,9 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import com.upc.smartharvest.services.LecturaSensorService;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/sensores")
@@ -18,10 +18,124 @@ import java.time.LocalDateTime;
 public class SensorLotController {
 
     private final SensorLotService sensorLotService;
+    private final LecturaSensorService lecturaSensorService;
 
     @GetMapping
     public ResponseEntity<List<SensorLotDTO>> findAll() {
         return new ResponseEntity<>(sensorLotService.listar().stream().map(this::toDTO).toList(), HttpStatus.OK);
+    }
+
+    @GetMapping("/ultimas-lecturas")
+    public ResponseEntity<List<Map<String, Object>>> listarSensoresConUltimaLectura() {
+        List<Map<String, Object>> respuesta = sensorLotService.listar()
+                .stream()
+                .map(sensor -> {
+                    Map<String, Object> item = new LinkedHashMap<>();
+
+                    item.put("sensor", toDTO(sensor));
+
+                    List<LecturaSensor> lecturas = lecturaSensorService.listarPorSensorOrdenFechaDesc(sensor.getId());
+
+                    if (lecturas.isEmpty()) {
+                        item.put("ultimaLectura", null);
+                    } else {
+                        LecturaSensor ultima = lecturas.get(0);
+
+                        Map<String, Object> ultimaLectura = new LinkedHashMap<>();
+                        ultimaLectura.put("id", ultima.getId());
+                        ultimaLectura.put("valor", ultima.getValor());
+                        ultimaLectura.put("unidadMedida", ultima.getUnidadMedida());
+                        ultimaLectura.put("esAnomalia", ultima.getEsAnomalia());
+                        ultimaLectura.put("fechaHora", ultima.getFechaHora());
+
+                        item.put("ultimaLectura", ultimaLectura);
+                    }
+
+                    return item;
+                })
+                .toList();
+
+        return new ResponseEntity<>(respuesta, HttpStatus.OK);
+    }
+
+    @GetMapping("/baterias")
+    public ResponseEntity<List<Map<String, Object>>> listarBateriasSensores() {
+        List<Map<String, Object>> respuesta = sensorLotService.listar()
+                .stream()
+                .map(sensor -> {
+                    Map<String, Object> item = new LinkedHashMap<>();
+
+                    item.put("id", sensor.getId());
+                    item.put("codigo", sensor.getCodigo());
+                    item.put("tipoSensor", sensor.getTipoSensor());
+                    item.put("estado", sensor.getEstado());
+                    item.put("bateriaPorcentaje", sensor.getBateriaPorcentaje());
+                    item.put("representacion", sensor.getBateriaPorcentaje() + "%");
+
+                    return item;
+                })
+                .toList();
+
+        return new ResponseEntity<>(respuesta, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/bateria")
+    public ResponseEntity<Map<String, Object>> obtenerBateriaSensor(@PathVariable Long id) {
+        try {
+            SensorLot sensor = sensorLotService.obtenerPorId(id);
+
+            Map<String, Object> respuesta = new LinkedHashMap<>();
+            respuesta.put("id", sensor.getId());
+            respuesta.put("codigo", sensor.getCodigo());
+            respuesta.put("tipoSensor", sensor.getTipoSensor());
+            respuesta.put("estado", sensor.getEstado());
+            respuesta.put("bateriaPorcentaje", sensor.getBateriaPorcentaje());
+            respuesta.put("representacion", sensor.getBateriaPorcentaje() + "%");
+
+            return new ResponseEntity<>(respuesta, HttpStatus.OK);
+
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/fechas-instalacion")
+    public ResponseEntity<List<Map<String, Object>>> listarFechasInstalacionSensores() {
+        List<Map<String, Object>> respuesta = sensorLotService.listar()
+                .stream()
+                .map(sensor -> {
+                    Map<String, Object> item = new LinkedHashMap<>();
+
+                    item.put("id", sensor.getId());
+                    item.put("codigo", sensor.getCodigo());
+                    item.put("tipoSensor", sensor.getTipoSensor());
+                    item.put("estado", sensor.getEstado());
+                    item.put("fechaInstalacion", sensor.getFechaInstalacion());
+
+                    return item;
+                })
+                .toList();
+
+        return new ResponseEntity<>(respuesta, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/fecha-instalacion")
+    public ResponseEntity<Map<String, Object>> obtenerFechaInstalacionSensor(@PathVariable Long id) {
+        try {
+            SensorLot sensor = sensorLotService.obtenerPorId(id);
+
+            Map<String, Object> respuesta = new LinkedHashMap<>();
+            respuesta.put("id", sensor.getId());
+            respuesta.put("codigo", sensor.getCodigo());
+            respuesta.put("tipoSensor", sensor.getTipoSensor());
+            respuesta.put("estado", sensor.getEstado());
+            respuesta.put("fechaInstalacion", sensor.getFechaInstalacion());
+
+            return new ResponseEntity<>(respuesta, HttpStatus.OK);
+
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping("/{id}")
