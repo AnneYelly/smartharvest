@@ -7,8 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
-import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/agricultores")
@@ -19,15 +19,24 @@ public class AgricultorController {
 
     @GetMapping
     public ResponseEntity<List<AgricultorDTO>> findAll() {
-        return new ResponseEntity<>(agricultorService.listar().stream().map(this::toDTO).toList(), HttpStatus.OK);
+        return new ResponseEntity<>(
+                agricultorService.listar()
+                        .stream()
+                        .map(this::toDTO)
+                        .toList(),
+                HttpStatus.OK
+        );
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<AgricultorDTO> findById(@PathVariable Long id) {
         try {
-            return new ResponseEntity<>(toDTO(agricultorService.obtenerPorId(id)), HttpStatus.OK);
+            return new ResponseEntity<>(
+                    toDTO(agricultorService.obtenerPorId(id)),
+                    HttpStatus.OK
+            );
         } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw e;
         }
     }
 
@@ -37,7 +46,7 @@ public class AgricultorController {
             Agricultor agricultor = agricultorService.obtenerPorId(id);
             return new ResponseEntity<>(toDTO(agricultor), HttpStatus.OK);
         } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw e;
         }
     }
 
@@ -54,7 +63,7 @@ public class AgricultorController {
 
             return new ResponseEntity<>(toDTO(actualizado), HttpStatus.OK);
         } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            throw e;
         }
     }
 
@@ -62,17 +71,27 @@ public class AgricultorController {
     public ResponseEntity<AgricultorDTO> create(@RequestBody AgricultorDTO dto) {
         Agricultor entity = new Agricultor();
         copyToEntity(dto, entity);
-        return new ResponseEntity<>(toDTO(agricultorService.registrar(entity)), HttpStatus.CREATED);
+
+        return new ResponseEntity<>(
+                toDTO(agricultorService.registrar(entity)),
+                HttpStatus.CREATED
+        );
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AgricultorDTO> update(@PathVariable Long id, @RequestBody AgricultorDTO dto) {
+    public ResponseEntity<AgricultorDTO> update(
+            @PathVariable Long id,
+            @RequestBody AgricultorDTO dto) {
         try {
             Agricultor entity = new Agricultor();
             copyToEntity(dto, entity);
-            return new ResponseEntity<>(toDTO(agricultorService.actualizar(id, entity)), HttpStatus.OK);
+
+            return new ResponseEntity<>(
+                    toDTO(agricultorService.actualizar(id, entity)),
+                    HttpStatus.OK
+            );
         } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw e;
         }
     }
 
@@ -82,27 +101,35 @@ public class AgricultorController {
             agricultorService.eliminar(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw e;
         }
     }
 
     @GetMapping("/activos")
     public ResponseEntity<List<AgricultorDTO>> findActivos() {
-        return new ResponseEntity<>(agricultorService.listarActivos().stream().map(this::toDTO).toList(), HttpStatus.OK);
+        return new ResponseEntity<>(
+                agricultorService.listarActivos()
+                        .stream()
+                        .map(this::toDTO)
+                        .toList(),
+                HttpStatus.OK
+        );
     }
 
     @GetMapping("/dni/{dni}")
     public ResponseEntity<AgricultorDTO> findDniDni(@PathVariable String dni) {
-        return agricultorService.buscarPorDni(dni)
-                        .map(a -> new ResponseEntity<>(toDTO(a), HttpStatus.OK))
-                        .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        Agricultor agricultor = agricultorService.buscarPorDni(dni)
+                .orElseThrow(() -> new RuntimeException("Agricultor no encontrado con DNI: " + dni));
+
+        return new ResponseEntity<>(toDTO(agricultor), HttpStatus.OK);
     }
 
     @GetMapping("/email/{email}")
     public ResponseEntity<AgricultorDTO> findEmailEmail(@PathVariable String email) {
-        return agricultorService.buscarPorEmail(email)
-                        .map(a -> new ResponseEntity<>(toDTO(a), HttpStatus.OK))
-                        .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        Agricultor agricultor = agricultorService.buscarPorEmail(email)
+                .orElseThrow(() -> new RuntimeException("Agricultor no encontrado con email: " + email));
+
+        return new ResponseEntity<>(toDTO(agricultor), HttpStatus.OK);
     }
 
     private AgricultorDTO toDTO(Agricultor entity) {

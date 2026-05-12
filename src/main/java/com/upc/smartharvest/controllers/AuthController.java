@@ -2,13 +2,13 @@ package com.upc.smartharvest.controllers;
 
 import com.upc.smartharvest.DTOS.LoginDTO;
 import com.upc.smartharvest.DTOS.LoginResponseDTO;
+import com.upc.smartharvest.Security.PasswordUtil;
+import com.upc.smartharvest.Security.TokenUtil;
 import com.upc.smartharvest.entities.Usuario;
 import com.upc.smartharvest.repository.UsuarioRepository;
-import com.upc.smartharvest.Security.PasswordUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.upc.smartharvest.Security.TokenUtil;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -22,21 +22,21 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO) {
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginDTO loginDTO) {
 
-        if (loginDTO.getUsername() == null || loginDTO.getUsername().isBlank()
-                || loginDTO.getPassword() == null || loginDTO.getPassword().isBlank()) {
-            return new ResponseEntity<>("Debe ingresar usuario y contraseña", HttpStatus.BAD_REQUEST);
+        if (loginDTO == null
+                || loginDTO.getUsername() == null
+                || loginDTO.getUsername().isBlank()
+                || loginDTO.getPassword() == null
+                || loginDTO.getPassword().isBlank()) {
+            throw new RuntimeException("Debe ingresar usuario y contraseña");
         }
 
-        Usuario usuario = usuarioRepository.findByUsername(loginDTO.getUsername()).orElse(null);
-
-        if (usuario == null) {
-            return new ResponseEntity<>("Usuario o contraseña incorrectos", HttpStatus.UNAUTHORIZED);
-        }
+        Usuario usuario = usuarioRepository.findByUsername(loginDTO.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuario o contraseña incorrectos"));
 
         if (!"ACTIVO".equalsIgnoreCase(usuario.getEstado())) {
-            return new ResponseEntity<>("El usuario se encuentra inactivo", HttpStatus.FORBIDDEN);
+            throw new RuntimeException("El usuario se encuentra inactivo");
         }
 
         boolean passwordCorrecto = PasswordUtil.verificarPassword(
@@ -45,7 +45,7 @@ public class AuthController {
         );
 
         if (!passwordCorrecto) {
-            return new ResponseEntity<>("Usuario o contraseña incorrectos", HttpStatus.UNAUTHORIZED);
+            throw new RuntimeException("Usuario o contraseña incorrectos");
         }
 
         String token = TokenUtil.generarToken(usuario.getUsername(), usuario.getRol());
@@ -55,7 +55,9 @@ public class AuthController {
         response.setUsername(usuario.getUsername());
         response.setRol(usuario.getRol());
         response.setEstado(usuario.getEstado());
-        response.setAgricultorId(usuario.getAgricultor().getId());
+        response.setAgricultorId(
+                usuario.getAgricultor() != null ? usuario.getAgricultor().getId() : null
+        );
         response.setMensaje("Inicio de sesión correcto");
         response.setToken(token);
 
@@ -63,7 +65,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
+    public ResponseEntity<String> logout() {
         return new ResponseEntity<>("Sesión cerrada correctamente", HttpStatus.OK);
     }
 }

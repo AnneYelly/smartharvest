@@ -7,10 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/cultivos")
@@ -21,15 +19,24 @@ public class CultivoController {
 
     @GetMapping
     public ResponseEntity<List<CultivoDTO>> findAll() {
-        return new ResponseEntity<>(cultivoService.listar().stream().map(this::toDTO).toList(), HttpStatus.OK);
+        return new ResponseEntity<>(
+                cultivoService.listar()
+                        .stream()
+                        .map(this::toDTO)
+                        .toList(),
+                HttpStatus.OK
+        );
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<CultivoDTO> findById(@PathVariable Long id) {
         try {
-            return new ResponseEntity<>(toDTO(cultivoService.obtenerPorId(id)), HttpStatus.OK);
+            return new ResponseEntity<>(
+                    toDTO(cultivoService.obtenerPorId(id)),
+                    HttpStatus.OK
+            );
         } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw e;
         }
     }
 
@@ -37,45 +44,78 @@ public class CultivoController {
     public ResponseEntity<CultivoDTO> create(@RequestBody CultivoDTO dto) {
         Cultivo entity = new Cultivo();
         copyToEntity(dto, entity);
-        return new ResponseEntity<>(toDTO(cultivoService.registrar(entity)), HttpStatus.CREATED);
+
+        return new ResponseEntity<>(
+                toDTO(cultivoService.registrar(entity)),
+                HttpStatus.CREATED
+        );
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CultivoDTO> update(@PathVariable Long id, @RequestBody CultivoDTO dto) {
+    public ResponseEntity<CultivoDTO> update(
+            @PathVariable Long id,
+            @RequestBody CultivoDTO dto) {
         try {
             Cultivo entity = new Cultivo();
             copyToEntity(dto, entity);
-            return new ResponseEntity<>(toDTO(cultivoService.actualizar(id, entity)), HttpStatus.OK);
+
+            return new ResponseEntity<>(
+                    toDTO(cultivoService.actualizar(id, entity)),
+                    HttpStatus.OK
+            );
         } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw e;
         }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Long id) {
-        Cultivo cultivo = cultivoService.obtenerPorId(id);
+        try {
+            cultivoService.obtenerPorId(id);
+            cultivoService.eliminar(id);
 
-        if (cultivo == null) {
-            return new ResponseEntity<>("Cultivo no encontrado", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(
+                    "Cultivo desactivado correctamente",
+                    HttpStatus.OK
+            );
+        } catch (RuntimeException e) {
+            throw e;
         }
-
-        cultivoService.eliminar(id);
-        return new ResponseEntity<>("Cultivo desactivado correctamente", HttpStatus.OK);
     }
 
     @GetMapping("/parcela/{parcelaId}")
     public ResponseEntity<List<CultivoDTO>> findParcelaParcelaId(@PathVariable Long parcelaId) {
-        return new ResponseEntity<>(cultivoService.listarPorParcela(parcelaId).stream().map(this::toDTO).toList(), HttpStatus.OK);
+        return new ResponseEntity<>(
+                cultivoService.listarPorParcela(parcelaId)
+                        .stream()
+                        .map(this::toDTO)
+                        .toList(),
+                HttpStatus.OK
+        );
     }
 
     @GetMapping("/parcela/{parcelaId}/estado/{estado}")
-    public ResponseEntity<List<CultivoDTO>> findParcelaParcelaIdEstadoEstado(@PathVariable Long parcelaId, @PathVariable String estado) {
-        return new ResponseEntity<>(cultivoService.listarPorParcelaYEstado(parcelaId, estado).stream().map(this::toDTO).toList(), HttpStatus.OK);
+    public ResponseEntity<List<CultivoDTO>> findParcelaParcelaIdEstadoEstado(
+            @PathVariable Long parcelaId,
+            @PathVariable String estado) {
+        return new ResponseEntity<>(
+                cultivoService.listarPorParcelaYEstado(parcelaId, estado)
+                        .stream()
+                        .map(this::toDTO)
+                        .toList(),
+                HttpStatus.OK
+        );
     }
 
     @GetMapping("/estado/{estado}")
     public ResponseEntity<List<CultivoDTO>> findEstadoEstado(@PathVariable String estado) {
-        return new ResponseEntity<>(cultivoService.listarPorEstado(estado).stream().map(this::toDTO).toList(), HttpStatus.OK);
+        return new ResponseEntity<>(
+                cultivoService.listarPorEstado(estado)
+                        .stream()
+                        .map(this::toDTO)
+                        .toList(),
+                HttpStatus.OK
+        );
     }
 
     private CultivoDTO toDTO(Cultivo entity) {
@@ -103,6 +143,7 @@ public class CultivoController {
         } else {
             entity.setParcela(null);
         }
+
         entity.setNombre(dto.getNombre());
         entity.setVariedad(dto.getVariedad());
         entity.setFechaSiembra(dto.getFechaSiembra());

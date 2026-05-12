@@ -55,7 +55,8 @@ public class DashboardController {
         dashboardDTO.setTotalSensoresActivos(
                 sensorLotRepository.findAll()
                         .stream()
-                        .filter(sensor -> "ACTIVO".equalsIgnoreCase(sensor.getEstado()))
+                        .filter(sensor -> sensor.getEstado() != null
+                                && "ACTIVO".equalsIgnoreCase(sensor.getEstado()))
                         .count()
         );
 
@@ -66,7 +67,8 @@ public class DashboardController {
         dashboardDTO.setTotalTareasPendientes(
                 tareaAgricolaRepository.findAll()
                         .stream()
-                        .filter(tarea -> "PENDIENTE".equalsIgnoreCase(tarea.getEstado()))
+                        .filter(tarea -> tarea.getEstado() != null
+                                && "PENDIENTE".equalsIgnoreCase(tarea.getEstado()))
                         .count()
         );
 
