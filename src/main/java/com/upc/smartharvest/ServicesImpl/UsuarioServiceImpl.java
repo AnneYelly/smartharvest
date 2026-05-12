@@ -1,5 +1,6 @@
 package com.upc.smartharvest.ServicesImpl;
 
+import com.upc.smartharvest.Security.PasswordUtil;
 import com.upc.smartharvest.entities.Usuario;
 import com.upc.smartharvest.repository.UsuarioRepository;
 import com.upc.smartharvest.services.UsuarioService;
@@ -36,6 +37,15 @@ public class UsuarioServiceImpl implements UsuarioService {
         if (usuarioRepository.existsByUsername(usuario.getUsername())) {
             throw new RuntimeException("Ya existe un usuario con username: " + usuario.getUsername());
         }
+
+        if (usuario.getPasswordHash() == null || usuario.getPasswordHash().isBlank()) {
+            throw new RuntimeException("La contraseña es obligatoria");
+        }
+
+        if (!PasswordUtil.esHashBCrypt(usuario.getPasswordHash())) {
+            usuario.setPasswordHash(PasswordUtil.hashPassword(usuario.getPasswordHash()));
+        }
+
         return usuarioRepository.save(usuario);
     }
 
@@ -44,16 +54,24 @@ public class UsuarioServiceImpl implements UsuarioService {
     public Usuario actualizar(Long id, Usuario usuario) {
         Usuario actual = obtenerPorId(id);
 
-        if (!Objects.equals(actual.getUsername(), usuario.getUsername()) && usuarioRepository.existsByUsername(usuario.getUsername())) {
+        if (!Objects.equals(actual.getUsername(), usuario.getUsername())
+                && usuarioRepository.existsByUsername(usuario.getUsername())) {
             throw new RuntimeException("Ya existe un usuario con username: " + usuario.getUsername());
         }
 
         actual.setAgricultor(usuario.getAgricultor());
         actual.setUsername(usuario.getUsername());
-        actual.setPasswordHash(usuario.getPasswordHash());
         actual.setRol(usuario.getRol());
         actual.setEstado(usuario.getEstado());
         actual.setUltimaAcceso(usuario.getUltimaAcceso());
+
+        if (usuario.getPasswordHash() != null && !usuario.getPasswordHash().isBlank()) {
+            if (PasswordUtil.esHashBCrypt(usuario.getPasswordHash())) {
+                actual.setPasswordHash(usuario.getPasswordHash());
+            } else {
+                actual.setPasswordHash(PasswordUtil.hashPassword(usuario.getPasswordHash()));
+            }
+        }
 
         return usuarioRepository.save(actual);
     }

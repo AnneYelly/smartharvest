@@ -64,11 +64,7 @@ public class ParcelaController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ParcelaDTO> findById(@PathVariable Long id) {
-        try {
-            return new ResponseEntity<>(toDTO(parcelaService.obtenerPorId(id)), HttpStatus.OK);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(toDTO(parcelaService.obtenerPorId(id)), HttpStatus.OK);
     }
 
     @PostMapping

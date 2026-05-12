@@ -1,5 +1,6 @@
 package com.upc.smartharvest;
 
+import com.upc.smartharvest.Security.PasswordUtil;
 import com.upc.smartharvest.entities.*;
 import com.upc.smartharvest.repository.*;
 import org.springframework.boot.CommandLineRunner;
@@ -33,8 +34,17 @@ public class SmartharvestApplication {
     ) {
         return args -> {
 
-            // Evita duplicar datos cada vez que levantas el proyecto
+
             if (agricultorRepository.existsByDni("12345678")) {
+
+                usuarioRepository.findByUsername("jperez").ifPresent(usuarioExistente -> {
+                    usuarioExistente.setPasswordHash(
+                            PasswordUtil.hashPassword("123456")
+                    );
+                    usuarioRepository.save(usuarioExistente);
+                    System.out.println("Password de jperez actualizado a BCrypt.");
+                });
+
                 System.out.println("Datos de prueba ya existen. No se insertó nuevamente.");
                 return;
             }
@@ -71,7 +81,7 @@ public class SmartharvestApplication {
             Usuario usuario = new Usuario();
             usuario.setAgricultor(agricultor);
             usuario.setUsername("jperez");
-            usuario.setPasswordHash("123456"); // Solo prueba. En producción debe ir encriptado.
+            usuario.setPasswordHash(PasswordUtil.hashPassword("123456"));
             usuario.setRol("AGRICULTOR");
             usuario.setEstado("ACTIVO");
             usuario.setUltimaAcceso(LocalDateTime.now());

@@ -4,9 +4,11 @@ import com.upc.smartharvest.DTOS.LoginDTO;
 import com.upc.smartharvest.DTOS.LoginResponseDTO;
 import com.upc.smartharvest.entities.Usuario;
 import com.upc.smartharvest.repository.UsuarioRepository;
+import com.upc.smartharvest.Security.PasswordUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.upc.smartharvest.Security.TokenUtil;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -37,9 +39,16 @@ public class AuthController {
             return new ResponseEntity<>("El usuario se encuentra inactivo", HttpStatus.FORBIDDEN);
         }
 
-        if (!usuario.getPasswordHash().equals(loginDTO.getPassword())) {
+        boolean passwordCorrecto = PasswordUtil.verificarPassword(
+                loginDTO.getPassword(),
+                usuario.getPasswordHash()
+        );
+
+        if (!passwordCorrecto) {
             return new ResponseEntity<>("Usuario o contraseña incorrectos", HttpStatus.UNAUTHORIZED);
         }
+
+        String token = TokenUtil.generarToken(usuario.getUsername(), usuario.getRol());
 
         LoginResponseDTO response = new LoginResponseDTO();
         response.setId(usuario.getId());
@@ -48,6 +57,7 @@ public class AuthController {
         response.setEstado(usuario.getEstado());
         response.setAgricultorId(usuario.getAgricultor().getId());
         response.setMensaje("Inicio de sesión correcto");
+        response.setToken(token);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

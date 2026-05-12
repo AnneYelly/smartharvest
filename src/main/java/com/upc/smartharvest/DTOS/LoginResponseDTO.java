@@ -2,6 +2,7 @@ package com.upc.smartharvest.DTOS;
 
 import lombok.Data;
 
+
 @Data
 public class LoginResponseDTO {
 
@@ -11,4 +12,5 @@ public class LoginResponseDTO {
     private String estado;
     private Long agricultorId;
     private String mensaje;
+    private String token;
 }
